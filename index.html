@@ -1,92 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Binary & Hex Trainer — ELI12+</title>
-  <meta name="description" content="Guided learning + drills for binary, hex, and IPv4. Assisted mode, achievements, accessibility, and round summaries. Single-file app for GitHub Pages." />
-  <style>
-    :root{
-      --bg:#0b1020; --panel:#111731; --muted:#8aa0ff; --text:#e8ecff; --accent:#6ee7ff; --good:#52ffa8; --bad:#ff7a7a; --warn:#ffd166;
-      --bit-off:#1a2246; --bit-on:#4f6cff; --bit-hl:#2a3569; --shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial; color:var(--text); background: radial-gradient(1200px 800px at 80% -10%, #223 0%, #0b1020 55%) fixed, var(--bg);}    
-    .wrap{max-width:1100px; margin:0 auto; padding:24px}
-    header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:16px}
-    .logo{display:flex; gap:12px; align-items:center}
-    .logo svg{width:28px; height:28px}
-    h1{font-size:22px; margin:0; letter-spacing:.4px}
-    .bar{display:flex; gap:10px; align-items:center}
-    .chip{background:linear-gradient(180deg, #1a2146, #111731); color:#cfe1ff; border:1px solid #2a3a7a; padding:8px 12px; border-radius:999px; font-size:13px; box-shadow:var(--shadow)}
-    .btn{background:linear-gradient(180deg,#5a78ff,#4b63e6); border:none; color:white; padding:10px 14px; border-radius:12px; font-weight:700; letter-spacing:.2px; cursor:pointer; box-shadow:var(--shadow); transition: transform .06s ease}
-    .btn:active{transform: translateY(1px)}
-    .btn.alt{background:linear-gradient(180deg,#1e2a5c,#17214a); color:#cfe1ff; border:1px solid #2b3b7c}
-    .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px}
-    .card{background:linear-gradient(180deg,#141a39,#0f1530); border:1px solid #26346f; border-radius:16px; padding:16px; box-shadow:var(--shadow)}
-    .title{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px}
-    .title h2{margin:0; font-size:16px; font-weight:800; letter-spacing:.4px}
-    .sub{font-size:12px; color:#b9c6ff}
-    .bits{display:grid; grid-template-columns: repeat(8, 1fr); gap:8px; margin:12px 0 8px}
-    .bit{aspect-ratio:1/1; border-radius:10px; display:grid; place-items:center; font-weight:900; font-size:18px; user-select:none; position:relative; border:1px solid #2a3b7a; background:var(--bit-off); transition: background .15s ease, transform .08s ease}
-    .bit.on{background:linear-gradient(180deg,#6b82ff,#4e66ff);}
-    .bit:focus{outline:2px solid #6ee7ff; outline-offset:2px}
-    .bit.flip{transform: scale(1.06)}
-    .bit .pv{position:absolute; bottom:-18px; font-size:10px; color:#8ea3ff}
-    .bit .pos{position:absolute; top:-16px; font-size:10px; color:#8ea3ff}
-    .pvrow{display:flex; justify-content:space-between; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; color:#9bb2ff; font-size:12px}
-    .prompt{font-size:26px; font-weight:900; letter-spacing:.5px}
-    .center{display:flex; gap:10px; align-items:center}
-    .in{background:#0d1533; border:1px solid #2a3a7a; color:#e8ecff; padding:10px 12px; border-radius:12px; font-size:16px; outline:none; min-width:220px}
-    .in.small{min-width:120px}
-    .keyrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
-    .key{padding:6px 10px; border:1px dashed #2a3b7a; border-radius:8px; font-size:12px; color:#b7c6ff}
-    .ok{color:var(--good); font-weight:800}
-    .bad{color:var(--bad); font-weight:800}
-    .num{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
-    .flex{display:flex; gap:16px; align-items:center}
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .stat{font-size:13px; color:#cbd7ff}
-    .hl{color:var(--accent); font-weight:800}
-    .hr{height:1px; background:#26346f; margin:12px 0}
-    .tag{padding:4px 8px; border-radius:8px; background:#16204a; border:1px solid #2a3b7a; color:#cfe1ff; font-size:12px}
-    code{background:#0f1540; padding:2px 6px; border-radius:6px; border:1px solid #24346e}
-    .tabs{display:flex; gap:8px}
-    .tab{padding:8px 12px; border-radius:10px; border:1px solid #2a3a7a; background:#121a3a; cursor:pointer; font-size:13px; color:#cfe1ff}
-    .tab.active{background:#4f6cff; color:white; border-color:#4f6cff}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
-    .foot{opacity:.7; font-size:12px; margin-top:6px}
-    @media (max-width: 900px){.grid{grid-template-columns:1fr}}
-
-    /* Timer bar */
-    .timerbar{height:8px; background:#16204a; border:1px solid #2a3a7a; border-radius:999px; overflow:hidden}
-    .timerfill{height:100%; width:100%; background:linear-gradient(90deg,#4f6cff,#6ee7ff); transform-origin:left center}
-
-    /* Answer feedback */
-    .in.okay{box-shadow:0 0 0 2px var(--good) inset}
-    .in.nope{box-shadow:0 0 0 2px var(--bad) inset}
-
-    /* Modal */
-    .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.5); backdrop-filter: blur(2px)}
-    .modal.show{display:grid}
-    .modal .panel{background:linear-gradient(180deg,#12183a,#0c1333); border:1px solid #25346e; border-radius:16px; padding:16px; width:min(560px,90vw)}
-
-    /* Achievements */
-    .badge{display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid #2a3a7a; background:#121a3a; font-size:12px}
-  </style>
+  <title>Binary &amp; Hex Trainer -- ELI12+</title>
+  <meta name="description" content="Guided learning + drills for binary, hex, IPv4/IPv6, and subnetting. Progression, achievements, accessibility, summaries, and persistence." />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 12a8 8 0 1 1 16 0" stroke="#6ee7ff" stroke-width="2"/><path d="M12 4v16" stroke="#8aa0ff" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#6b82ff"/></svg>
-        <h1>Binary & Hex Trainer — ELI12+</h1>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M4 12a8 8 0 1 1 16 0" stroke="#6ee7ff" stroke-width="2" />
+          <path d="M12 4v16" stroke="#8aa0ff" stroke-width="2" />
+          <circle cx="12" cy="12" r="3" fill="#6b82ff" />
+        </svg>
+        <h1>Binary &amp; Hex Trainer</h1>
       </div>
-      <div class="bar">
+      <div class="bar" role="group" aria-label="Status and actions">
         <div class="chip" id="levelChip" aria-live="polite">Level 1</div>
         <div class="chip" id="streakChip" aria-live="polite">Streak 0</div>
-        <div class="chip" id="achChip" title="Achievements">0 🏅</div>
+        <div class="chip" id="achChip" title="Achievements">0 trophies</div>
+        <div class="chip" id="accuracyChip" aria-live="polite">Accuracy 0%</div>
+        <button class="btn alt" id="themeToggle" aria-pressed="false">Light mode</button>
         <button class="btn alt" id="resetBtn" title="Reset progress">Reset</button>
         <button class="btn" id="nextBtn" title="Next question (Enter)">Next</button>
       </div>
@@ -96,563 +33,250 @@
       <!-- Left: Game -->
       <section class="card" id="gameCard" aria-live="polite">
         <div class="title">
-          <h2>Drill</h2>
+          <h2 id="drillHeading">Drill</h2>
           <div class="tabs" role="tablist" aria-label="Modes">
-            <button class="tab active" data-mode="octet" role="tab" aria-selected="true" aria-controls="panel-octet">Octet</button>
-            <button class="tab" data-mode="ipv4" role="tab" aria-controls="panel-ipv4">IPv4</button>
-            <button class="tab" data-mode="hex" role="tab" aria-controls="panel-hex">Hex</button>
-            <button class="tab" data-mode="mask" role="tab" aria-controls="panel-mask">Masks</button>
+            <button class="tab active" data-mode="octet" role="tab" aria-selected="true" aria-controls="panel-octet" data-unlock="1">Octet</button>
+            <button class="tab" data-mode="ipv4" role="tab" aria-controls="panel-ipv4" data-unlock="1">IPv4</button>
+            <button class="tab" data-mode="hex" role="tab" aria-controls="panel-hex" data-unlock="2">Hex</button>
+            <button class="tab" data-mode="mask" role="tab" aria-controls="panel-mask" data-unlock="3">Masks</button>
+            <button class="tab" data-mode="ipv6" role="tab" aria-controls="panel-ipv6" data-unlock="4">IPv6</button>
+            <button class="tab" data-mode="subnet" role="tab" aria-controls="panel-subnet" data-unlock="5">Subnet</button>
+            <button class="tab" data-mode="reverse" role="tab" aria-controls="panel-reverse" data-unlock="2">Reverse</button>
+          </div>
+        </div>        <div class="session-toolbar" role="toolbar" aria-label="Learning controls">
+          <div class="toolbar-strip">
+            <label class="toolbar-toggle">
+              <input type="checkbox" id="assist" />
+              <span class="toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+              </span>
+              <span class="toggle-text">
+                <span class="toggle-title">Assist hints</span>
+                <span class="toggle-note">Helpful nudges</span>
+              </span>
+            </label>
+            <label class="toolbar-toggle">
+              <input type="checkbox" id="noTimer" />
+              <span class="toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+              </span>
+              <span class="toggle-text">
+                <span class="toggle-title">No timer</span>
+                <span class="toggle-note">Free play</span>
+              </span>
+            </label>
+            <label class="toolbar-toggle">
+              <input type="checkbox" id="showPV" checked />
+              <span class="toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
+                </svg>
+              </span>
+              <span class="toggle-text">
+                <span class="toggle-title">Place values</span>
+                <span class="toggle-note">Show bit weights</span>
+              </span>
+            </label>
+            <label class="toolbar-toggle">
+              <input type="checkbox" id="strict" />
+              <span class="toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                </svg>
+              </span>
+              <span class="toggle-text">
+                <span class="toggle-title">Strict timing</span>
+                <span class="toggle-note">Shorter rounds</span>
+              </span>
+            </label>
+            <label class="toolbar-toggle">
+              <input type="checkbox" id="autoExplain" />
+              <span class="toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                </svg>
+              </span>
+              <span class="toggle-text">
+                <span class="toggle-title">Step-through</span>
+                <span class="toggle-note">Explain mistakes</span>
+              </span>
+            </label>
+          </div>
+          <div class="toolbar-strip toolbar-secondary">
+            <div class="toolbar-progress" aria-live="polite">
+              <span class="toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0" />
+                </svg>
+              </span>
+              <div class="toolbar-progress-text">
+                <span class="toggle-title">Progress</span>
+                <div class="toolbar-badges" id="badgeRow">No achievements yet</div>
+              </div>
+            </div>
+            <div class="toolbar-actions">
+              <button class="btn icon-btn" id="exportBtn" type="button">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                  </svg>
+                </span>
+                <span>Export JSON</span>
+              </button>
+              <label class="btn alt icon-btn file-btn" for="importInput">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                </span>
+                <span>Import JSON</span>
+              </label>
+            </div>
+            <div class="toolbar-note">Progress saved locally.</div>
           </div>
         </div>
-
-        <div id="promptRow" class="row" style="margin-bottom:10px">
-          <div class="prompt" id="prompt" aria-live="polite">—</div>
-          <div class="tag" id="taskTag">Convert to decimal</div>
-          <label class="row" style="margin-left:auto"><input type="checkbox" id="assist"/> Assisted</label>
+        <div id="promptRow" class="prompt-row" role="group" aria-labelledby="drillHeading">
+          <div class="prompt-block">
+            <div class="prompt" id="prompt" aria-live="polite">--</div>
+            <div class="task-banner" id="taskTag">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 6h9m-9 6h16.5" />
+              </svg>
+              <span class="task-text">Convert to decimal</span>
+            </div>
+          </div>
         </div>
+        <div class="assist-hint" id="assistHint" aria-live="polite" aria-hidden="true"></div>
 
-        <div class="bits" id="bits" aria-label="Bits" role="grid"></div>
+        <div class="bits" id="bits" aria-label="Bit editor" role="grid"></div>
         <div class="pvrow" id="pvRow" aria-hidden="false"></div>
 
         <div class="center" style="margin-top:12px">
-          <input id="answer" class="in" placeholder="Type answer…" autocomplete="off" inputmode="decimal" aria-label="Answer" />
+          <input id="answer" class="in" placeholder="Type your answer..." autocomplete="off" inputmode="text" aria-label="Answer" />
           <button class="btn" id="checkBtn" aria-label="Check answer">Check</button>
-          <div id="result" class="stat" aria-live="polite"></div>
+          <div id="result" class="stat" role="status" aria-live="assertive"></div>
         </div>
 
-        <div class="keyrow" aria-hidden="false">
-          <div class="key">Enter = Next</div>
-          <div class="key">Space = Toggle bit (Octet/Mask)</div>
-          <div class="key">B/H/D = Answer base</div>
-          <div class="key">1–4 = Switch mode</div>
+        <div class="hr"></div>        <div class="timerbar" id="timerBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-live="off">
+          <div id="timerfill" class="timerfill"></div>
         </div>
-
-        <div class="hr"></div>
-        <div class="timerbar" aria-hidden="true"><div id="timerfill" class="timerfill"></div></div>
-        <div class="row" style="margin-top:8px">
-          <div class="stat">Time: <span class="hl" id="time">0.0s</span></div>
-          <div class="stat">Best: <span class="hl" id="best">—</span></div>
-          <div class="stat">Accuracy: <span class="hl" id="acc">0%</span></div>
+        <div class="row timeRow" style="margin-top:8px">
+          <div class="stat">Time left: <span class="hl" id="time">0.0s</span></div>
+          <div class="stat">Best: <span class="hl" id="best">&mdash;</span></div>
+          <div class="stat">Overall accuracy: <span class="hl" id="overallAcc">0%</span></div>
+          <div class="stat">Round accuracy: <span class="hl" id="roundAcc">0%</span></div>
           <div class="stat">XP: <span class="hl" id="xp">0</span></div>
         </div>
       </section>
 
       <!-- Right: Learn + Settings -->
-      <aside class="card" aria-label="Learn and Settings">
+      <aside class="card" aria-label="Learn and Settings" role="complementary">
         <div class="title">
           <h2>ELI12</h2>
-          <div class="row">
-            <label class="stat"><input type="checkbox" id="showPV" checked /> Show place values</label>
-            <label class="stat"><input type="checkbox" id="strict" /> Strict timing</label>
-          </div>
         </div>
         <div class="sub" style="line-height:1.5">
-          Bits are 0 or 1. Eight bits make a byte. Each bit spot has a value: <span class="mono">128 64 32 16 8 4 2 1</span> (left→right). If a bit shows 1, you add its value. That total is the decimal number.
+          Bits are 0 or 1. Eight bits make a byte. Each bit spot has a value: <span class="mono">128 64 32 16 8 4 2 1</span> (left to right). If a bit shows 1, add its value to get the decimal number.
         </div>
         <div class="hr"></div>
         <div style="display:grid; gap:10px">
           <div>
-            <strong>Binary → Decimal</strong>
-            <div class="sub">Add the values under the 1s. Example: <code class="mono">11001010</code> → <code>128+64+8+2 = 202</code>.</div>
+            <strong>Binary -> Decimal</strong>
+            <div class="sub">Add the values under the 1s. Example: <code class="mono">11001010</code> -> <code>128 + 64 + 8 + 2 = 202</code>.</div>
           </div>
           <div>
-            <strong>Decimal → Binary</strong>
-            <div class="sub">Start at 128 and go down. Use a bit if it fits. Example: 202 → fits 128 → remainder 74 → fits 64 → remainder 10 → fits 8 → remainder 2 → fits 2 → remainder 0 → <code class="mono">11001010</code>.</div>
+            <strong>Decimal -> Binary</strong>
+            <div class="sub">Start at 128 and work down. Use a bit if it fits. Example: 202 -> fits 128 -> remainder 74 -> fits 64 -> remainder 10 -> fits 8 -> remainder 2 -> fits 2 -> remainder 0 -> <code class="mono">11001010</code>.</div>
           </div>
           <div>
             <strong>Hex</strong>
-            <div class="sub">1 hex digit = 4 bits. Group 8 bits into two groups of 4. Example: <code class="mono">11000000</code> = <code class="mono">1100</code> <code class="mono">0000</code> = <code>C</code><code>0</code> = <code class="mono">C0</code> = 192.</div>
+            <div class="sub">One hex digit equals four bits. Group eight bits into two chunks of four. Example: <code class="mono">11000000</code> -> <code class="mono">1100 0000</code> -> <code>C0</code> -> 192.</div>
           </div>
           <div>
             <strong>IPv4</strong>
-            <div class="sub">An IP has 4 bytes. Example: <span class="mono">11000000.10101000.00000000.00000001</span> → <code>192.168.0.1</code> → hex <span class="mono">C0.A8.00.01</span>.</div>
+            <div class="sub">An IP has four bytes. Example: <span class="mono">11000000.10101000.00000000.00000001</span> -> <code>192.168.0.1</code>.</div>
           </div>
           <div>
             <strong>Masks</strong>
-            <div class="sub">Inside one byte: <span class="mono">/25 128</span>, <span class="mono">/26 192</span>, <span class="mono">/27 224</span>, <span class="mono">/28 240</span>, <span class="mono">/29 248</span>, <span class="mono">/30 252</span>, <span class="mono">/31 254</span>, <span class="mono">/32 255</span>.</div>
+            <div class="sub">Inside one byte: <span class="mono">/25 128</span>, <span class="mono">/26 192</span>, ... , <span class="mono">/32 255</span>.</div>
           </div>
         </div>
         <div class="hr"></div>
+
         <div class="title"><h2>Settings</h2></div>
-        <div style="display:grid; gap:10px">
-          <label class="row">Mode answer base:
+        <div class="settings-grid">
+          <label class="setting-control">
+            <span class="setting-label">Answer base</span>
             <select id="answerBase" class="in small" aria-label="Answer base">
               <option value="dec">Decimal</option>
               <option value="bin">Binary</option>
               <option value="hex">Hex</option>
             </select>
           </label>
-          <label class="row">Difficulty:
+          <label class="setting-control">
+            <span class="setting-label">Difficulty</span>
             <select id="difficulty" class="in small" aria-label="Difficulty">
-              <option value="noob">Noob</option>
               <option value="easy">Easy</option>
-              <option value="norm" selected>Normal</option>
+              <option value="norm">Normal</option>
               <option value="hard">Hard</option>
+              <option value="expert">Expert</option>
             </select>
           </label>
-          <label class="row">Round length (s):
-            <input id="roundLen" class="in small" type="number" min="5" max="90" value="30" />
+          <label class="setting-control">
+            <span class="setting-label">Round length (seconds)</span>
+            <input id="roundLen" class="in small" type="number" min="5" max="120" value="30" />
           </label>
-        </div>
-        <div style="margin-top:10px">
-          <div class="badge" id="badgeRow">No achievements yet</div>
-        </div>
-        <div class="foot">Progress saved locally.</div>
+          </div>
+        <div class="hr"></div>
       </aside>
     </div>
   </div>
 
   <!-- Round Summary Modal -->
   <div id="summaryModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="sumTitle" aria-describedby="sumDesc">
-    <div class="panel">
+    <div class="panel" role="document">
       <div class="title"><h2 id="sumTitle">Round summary</h2><button class="btn alt" id="closeSummary">Close</button></div>
       <div id="sumDesc" class="sub" style="margin-bottom:10px">Performance overview for the last round.</div>
       <div id="sumBody" style="display:grid; gap:8px"></div>
+      <div class="chart-row">
+        <canvas id="speedChart" width="480" height="160" role="img" aria-label="Speed per question"></canvas>
+        <canvas id="accuracyChart" width="480" height="160" role="img" aria-label="Accuracy trend"></canvas>
+      </div>
     </div>
   </div>
 
-  <script>
-  ;(() => {
-    const el = id => document.getElementById(id)
-    const bitsEl = el('bits'), pvRow = el('pvRow'), promptEl = el('prompt'), tag = el('taskTag')
-    const ans = el('answer'), res = el('result'), timeEl = el('time'), bestEl = el('best'), accEl = el('acc'), xpEl = el('xp')
-    const nextBtn = el('nextBtn'), checkBtn = el('checkBtn'), resetBtn = el('resetBtn')
-    const answerBaseSel = el('answerBase'), diffSel = el('difficulty'), roundLenInput = el('roundLen')
-    const levelChip = el('levelChip'), streakChip = el('streakChip'), achChip = el('achChip')
-    const showPV = el('showPV'), strict = el('strict'), assist = el('assist')
-    const tabs = Array.from(document.querySelectorAll('.tab'))
-    const timerfill = el('timerfill')
-    const summaryModal = el('summaryModal'), closeSummary = el('closeSummary'), sumBody = el('sumBody')
-    const badgeRow = el('badgeRow')
+  <!-- Explanation Modal -->
+  <div id="explainModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="explainTitle" aria-describedby="explainBody">
+    <div class="panel" role="document">
+      <div class="title"><h2 id="explainTitle">Step-through</h2><button class="btn alt" id="closeExplain">Close</button></div>
+      <div id="explainBody" class="sub" style="display:grid; gap:10px"></div>
+    </div>
+  </div>
 
-    // --- State ---
-    const S = {
-      mode: 'octet', // octet | ipv4 | hex | mask
-      answerBase: 'dec',
-      question: null,
-      startAt: 0,
-      solved: 0,
-      wrong: 0,
-      xp: 0,
-      best: null,
-      streak: 0,
-      level: 1,
-      timerId: null,
-      roundEndAt: 0,
-      difficulty: 'norm',
-      roundLen: 30,
-      hist: [], // per-question times + ok
-      ach: { // achievements
-        speedy:false, // <3s best
-        hotstreak:false, // streak 10
-        perfect:false // 10/10
-      },
-      perMode: { octet:{best:null, acc:0,total:0,ok:0}, ipv4:{best:null, acc:0,total:0,ok:0}, hex:{best:null, acc:0,total:0,ok:0}, mask:{best:null, acc:0,total:0,ok:0} }
-    }
-
-    // --- Storage helpers ---
-    const save = () => localStorage.setItem('bhx_v2', JSON.stringify({
-      best:S.best, xp:S.xp, streak:S.streak, level:S.level, difficulty:S.difficulty, roundLen:S.roundLen,
-      ach:S.ach, perMode:S.perMode
-    }))
-    const load = () => {
-      try{
-        const v = JSON.parse(localStorage.getItem('bhx_v2')||'null')
-        if(!v) return
-        S.best=v.best; S.xp=v.xp||0; S.streak=v.streak||0; S.level=v.level||1; S.difficulty=v.difficulty||'norm'; S.roundLen=v.roundLen||30
-        S.ach = Object.assign(S.ach, v.ach||{})
-        S.perMode = Object.assign(S.perMode, v.perMode||{})
-      }catch{}
-    }
-
-    // --- Utils ---
-    const pad = (n,len=8) => n.toString(2).padStart(len,'0')
-    const binToDec = b => parseInt(b.replace(/\s|_/g,''),2)
-    const decToBin = n => pad(+n)
-    const decToHex = n => (+n).toString(16).toUpperCase().padStart(2,'0')
-    const hexToDec = h => parseInt(h,16)
-    const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a
-    const sample = arr => arr[rand(0,arr.length-1)]
-    const clamp = (v,a,b)=>Math.max(a,Math.min(b,v))
-
-    const powers = [128,64,32,16,8,4,2,1]
-
-    // --- Rendering bits ---
-    const renderBits = (byteStr) => {
-      bitsEl.innerHTML=''
-      pvRow.textContent = showPV.checked ? powers.join('  ') : ''
-      for (let i=0;i<8;i++){
-        const v = +byteStr[i]
-        const d = document.createElement('div'); d.className='bit'+(v?' on':''); d.tabIndex=0; d.setAttribute('role','button'); d.setAttribute('aria-pressed', v? 'true':'false')
-        d.dataset.pos = i; d.dataset.value = powers[i]
-        d.innerHTML = `<span>${v}</span><span class="pos">${7-i}</span><span class="pv">${showPV.checked?powers[i]:''}</span>`
-        d.addEventListener('click', () => toggleBit(i))
-        d.addEventListener('keydown', (e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggleBit(i) } })
-        bitsEl.appendChild(d)
-      }
-    }
-    const getBitsStr = () => Array.from(bitsEl.children).map(c=>c.classList.contains('on')?'1':'0').join('')
-    const setBitsStr = s => Array.from(bitsEl.children).forEach((c,i)=>{c.classList.toggle('on', s[i]==='1'); c.firstChild.textContent=s[i]; c.setAttribute('aria-pressed', s[i]==='1'?'true':'false')})
-    const toggleBit = i => { const s = getBitsStr().split(''); s[i] = s[i]==='1'?'0':'1'; setBitsStr(s.join('')); flipAnim(i); syncPromptFromBits(); if(assist.checked) assistHint() }
-    const flipAnim = i => { const c = bitsEl.children[i]; c.classList.add('flip'); setTimeout(()=>c.classList.remove('flip'),120) }
-
-    // --- Difficulty rules ---
-    function applyDifficulty(){
-      const d = S.difficulty
-      // Base round duration already taken from input
-      // Answer base auto for noob
-      if(d==='noob'){ answerBaseSel.value='dec'; S.answerBase='dec'; strict.checked=false }
-    }
-
-    // --- Question generation ---
-    function genOctet(){
-      // difficulty alters distribution
-      let n
-      if(S.difficulty==='noob'){
-        // bias to one-hot and low popcount
-        const patterns = [1,2,4,8,16,32,64,128,3,5,6,9,10,12,129,130]
-        n = sample(patterns)
-      } else if(S.difficulty==='easy'){
-        // bias to simple combos
-        const a = [0,1,2,3,4,5,6,7,8,16,32,64,128,255,254,252,248,240,224]
-        n = sample(a)
-      } else if(S.difficulty==='hard'){
-        n = rand(0,255)
-        // forbid trivial extremes occasionally
-        if([0,255].includes(n)) n = rand(1,254)
-      } else {
-        n = rand(0,255)
-      }
-      const b = pad(n)
-      const h = decToHex(n)
-      return { type:'octet', n, b, h }
-    }
-    function genIPv4(){
-      const cap = S.difficulty==='noob'? [rand(0,31),rand(0,31),rand(0,31),rand(0,31)] : [rand(0,255),rand(0,255),rand(0,255),rand(0,255)]
-      return { type:'ipv4', o:cap, b:cap.map(decToBin), h:cap.map(decToHex) }
-    }
-    function genHex(){
-      const n = S.difficulty==='noob' ? sample([0x0,0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80,0xF,0xA,0xC,0x3]) : rand(0,255)
-      return { type:'hex', n, b:decToBin(n), h:decToHex(n) }
-    }
-    function genMask(){
-      const cidr = S.difficulty==='noob'? rand(30,32) : rand(24,32)
-      const ones = cidr%8
-      const full = Math.floor(cidr/8)
-      const octets = [0,0,0,0]
-      for(let i=0;i<4;i++){
-        if(i<full) octets[i]=255
-        else if(i===full && ones>0) octets[i] = 255 - (2**(8-ones) - 1)
-      }
-      return { type:'mask', cidr, octets, b:octets.map(decToBin), h:octets.map(decToHex) }
-    }
-
-    function pickQuestion(){
-      switch(S.mode){
-        case 'octet': return genOctet()
-        case 'ipv4': return genIPv4()
-        case 'hex': return genHex()
-        case 'mask': return genMask()
-      }
-    }
-
-    // --- Prompting ---
-    function showQuestion(){
-      S.question = pickQuestion()
-      res.textContent=''
-      ans.value=''
-      ans.classList.remove('okay','nope')
-      S.startAt = performance.now()
-      S.hist.push({t:Date.now(), ok:null, ms:0, mode:S.mode})
-
-      if(S.mode==='octet'){
-        const askFrom = sample(['bin','dec','hex'])
-        const askTo = S.answerBase
-        const q = S.question
-        const source = askFrom===askTo ? (askFrom==='bin'?'dec':'bin') : askFrom
-        const srcText = source==='bin'? q.b : source==='hex'? q.h : String(q.n)
-        promptEl.textContent = srcText
-        tag.textContent = `Convert ${source.toUpperCase()} → ${askTo.toUpperCase()}`
-        renderBits(source==='bin'? q.b : pad(q.n))
-      }
-      else if(S.mode==='ipv4'){
-        const askFrom = sample(['bin','dec','hex'])
-        const askTo = S.answerBase
-        const q = S.question
-        const source = askFrom===askTo ? (askFrom==='bin'?'dec':'bin') : askFrom
-        const srcText = source==='bin'? q.b.join('.') : source==='hex'? q.h.join('.') : q.o.join('.')
-        promptEl.textContent = srcText
-        tag.textContent = `Convert ${source.toUpperCase()} → ${askTo.toUpperCase()}`
-        renderBits('00000000')
-      }
-      else if(S.mode==='hex'){
-        const askFrom = sample(['hex','bin','dec'])
-        const askTo = S.answerBase
-        const q = S.question
-        const source = askFrom===askTo ? (askFrom==='hex'?'dec':'hex') : askFrom
-        const srcText = source==='bin'? q.b : source==='hex'? q.h : String(q.n)
-        promptEl.textContent = srcText
-        tag.textContent = `Convert ${source.toUpperCase()} → ${askTo.toUpperCase()}`
-        renderBits(q.b)
-      }
-      else if(S.mode==='mask'){
-        const askTo = S.answerBase
-        const q = S.question
-        const present = sample(['cidr','dec','bin','hex'])
-        let srcText
-        if(present==='cidr'){ srcText = `/${q.cidr}` }
-        else if(present==='dec'){ srcText = q.octets.join('.') }
-        else if(present==='hex'){ srcText = q.h.join('.') }
-        else { srcText = q.b.join('.') }
-        promptEl.textContent = srcText
-        tag.textContent = `Mask → ${askTo.toUpperCase()}`
-        renderBits('11111111')
-      }
-      updateTimer(true)
-      if(assist.checked) assistHint(true)
-    }
-
-    function syncPromptFromBits(){
-      if(S.mode==='octet'){
-        const b = getBitsStr(); const n = binToDec(b)
-        el('taskTag').textContent = `${b} = ${n}`
-      }
-    }
-
-    // --- Assisted guidance ---
-    function assistHint(reset=false){
-      if(S.mode!=='octet') return
-      const b = getBitsStr().split('')
-      // highlight contributing PVs by bolding and updating tag explanation
-      const add = []
-      b.forEach((v,i)=>{ if(v==='1') add.push(powers[i]) })
-      const math = add.length? add.join(' + ') + ' = ' + add.reduce((a,c)=>a+c,0) : 'No 1-bits set yet'
-      tag.textContent = `Add highlighted values: ${math}`
-      // dim non-contributing PVs
-      Array.from(bitsEl.children).forEach((c,i)=>{
-        const pv = c.querySelector('.pv')
-        if(!pv) return
-        pv.style.opacity = b[i]==='1'? '1':'0.35'
-      })
-    }
-
-    // --- Checking answers ---
-    function parseAnswerBase(v){
-      v=v.trim()
-      if(!v) return null
-      const baseTag = (S.answerBase)
-      if(baseTag==='dec') return {base:'dec', value: Number(v)}
-      if(baseTag==='bin') return {base:'bin', value: v.replace(/\s|_/g,'')}
-      if(baseTag==='hex') return {base:'hex', value: v.toUpperCase()}
-    }
-
-    function correctAnswer(){
-      const q = S.question
-      const to = S.answerBase
-      if(S.mode==='octet' || S.mode==='hex'){
-        if(to==='dec') return String(q.n)
-        if(to==='bin') return q.b
-        if(to==='hex') return q.h
-      }
-      if(S.mode==='ipv4'){
-        if(to==='dec') return q.o.join('.')
-        if(to==='bin') return q.b.join('.')
-        if(to==='hex') return q.h.join('.')
-      }
-      if(S.mode==='mask'){
-        if(to==='dec') return q.octets.join('.')
-        if(to==='bin') return q.b.join('.')
-        if(to==='hex') return q.h.join('.')
-      }
-      return ''
-    }
-
-    function normalise(v){
-      if(S.answerBase==='dec') return v.replace(/\s+/g,'')
-      if(S.answerBase==='bin') return v.replace(/\s|_/g,'').replace(/\.+/g,'.')
-      if(S.answerBase==='hex') return v.toUpperCase().replace(/\s|_/g,'').replace(/\.+/g,'.')
-    }
-
-    function check(){
-      const user = parseAnswerBase(ans.value)
-      if(!user) return
-      const target = correctAnswer()
-      const userNorm = normalise(String(user.value))
-      const targetNorm = normalise(String(target))
-      const t = (performance.now()-S.startAt)/1000
-      const ok = userNorm === targetNorm
-
-      const last = S.hist[S.hist.length-1]; if(last){ last.ok = ok; last.ms = t }
-
-      if(ok){
-        S.solved++; S.streak++; const gain = Math.max(1, Math.round(10 - t/2)); S.xp += gain
-        res.innerHTML = `<span class="ok">Correct</span> — ${target} <span class="sub">(+${gain}xp)</span>`
-        res.setAttribute('aria-live','polite')
-        ans.classList.remove('nope'); ans.classList.add('okay')
-        if(!S.best || t < S.best) S.best = t
-        const m = S.perMode[S.mode]; m.total++; m.ok++; if(!m.best || t<m.best) m.best=t; m.acc = Math.round(m.ok*100/m.total)
-        // achievements
-        if(S.best && S.best < 3 && !S.ach.speedy){ S.ach.speedy=true; toastBadge('Speedy: sub-3s') }
-        if(S.streak>=10 && !S.ach.hotstreak){ S.ach.hotstreak=true; toastBadge('Hot Streak: 10 correct') }
-      } else {
-        S.wrong++; S.streak = 0; S.xp = Math.max(0, S.xp-1)
-        res.innerHTML = `<span class="bad">Wrong</span> — correct: <span class="mono">${target}</span>`
-        res.setAttribute('aria-live','polite')
-        ans.classList.remove('okay'); ans.classList.add('nope')
-        const m = S.perMode[S.mode]; m.total++; m.acc = Math.round(m.ok*100/m.total)
-      }
-
-      // level logic
-      if(S.xp >= S.level*60){ S.level++; S.xp = 0 }
-
-      // perfect achievement check on soft 10 sample window
-      const last10 = S.hist.slice(-10)
-      if(last10.length===10 && last10.every(x=>x.ok) && !S.ach.perfect){ S.ach.perfect=true; toastBadge('Perfect: 10/10') }
-
-      // UI updates
-      bestEl.textContent = S.best? `${S.best.toFixed(1)}s` : '—'
-      const total = S.solved+S.wrong
-      accEl.textContent = total? `${Math.round(S.solved*100/total)}%` : '0%'
-      xpEl.textContent = S.xp
-      levelChip.textContent = `Level ${S.level}`
-      streakChip.textContent = `Streak ${S.streak}`
-      updateBadges()
-
-      save();
-
-      if(strict.checked && ok){ next() }
-    }
-
-    // --- Badges UI ---
-    function updateBadges(){
-      const list = []
-      if(S.ach.speedy) list.push('Speedy')
-      if(S.ach.hotstreak) list.push('Hot Streak')
-      if(S.ach.perfect) list.push('Perfect')
-      badgeRow.textContent = list.length? list.join(' • ') : 'No achievements yet'
-      achChip.textContent = `${list.length} 🏅`
-    }
-    function toastBadge(text){
-      const t = document.createElement('div')
-      t.className='badge'
-      t.textContent = '🏅 '+text
-      Object.assign(t.style,{position:'fixed',right:'16px',bottom:'16px',zIndex:1000})
-      document.body.appendChild(t)
-      setTimeout(()=>t.remove(), 2500)
-    }
-
-    function next(){ showQuestion(); ans.focus() }
-
-    // --- Timer / Rounds ---
-    function updateTimer(start=false){
-      if(start){
-        const len = Number(roundLenInput.value)||30
-        S.roundLen = clamp(len,5,90)
-        // strict timing: shorter by difficulty
-        const d = S.difficulty
-        let mult = 1
-        if(d==='noob') mult = 1.5
-        else if(d==='easy') mult = 1.2
-        else if(d==='hard') mult = 0.8
-        const totalMs = S.roundLen * 1000 * mult
-        S.roundEndAt = performance.now() + totalMs
-        if(S.timerId) cancelAnimationFrame(S.timerId)
-        tick()
-        return
-      }
-    }
-
-    function tick(){
-      const left = Math.max(0, S.roundEndAt - performance.now())
-      const total = Number(roundLenInput.value||30) * 1000
-      timeEl.textContent = (left/1000).toFixed(1)+'s'
-      const frac = Math.max(0, Math.min(1, left / (S.roundEndAt - (S.roundEndAt - total))))
-      timerfill.style.transform = `scaleX(${frac})`
-      if(left<=0){
-        // End of round: summarise and restart
-        res.innerHTML = `<span class="tag">Round over</span> — solved ${S.solved} / ${S.solved+S.wrong}`
-        showSummary();
-        S.solved=0; S.wrong=0; save(); showQuestion(); return
-      }
-      S.timerId = requestAnimationFrame(tick)
-    }
-
-    // --- Summary modal ---
-    function showSummary(){
-      // compute simple stats from last 10 entries
-      const last = S.hist.slice(-Math.min(20, S.hist.length))
-      const ok = last.filter(x=>x.ok).length
-      const times = last.filter(x=>x.ok).map(x=>x.ms)
-      const avg = times.length? (times.reduce((a,c)=>a+c,0)/times.length) : 0
-      sumBody.innerHTML = `
-        <div class="row"><div class="stat">Recent: <span class="hl">${ok}/${last.length}</span></div><div class="stat">Avg time (correct): <span class="hl">${avg?avg.toFixed(2)+'s':'—'}</span></div></div>
-        <div class="stat">Per-mode bests: Octet ${fmtBest('octet')}, IPv4 ${fmtBest('ipv4')}, Hex ${fmtBest('hex')}, Mask ${fmtBest('mask')}</div>
-      `
-      summaryModal.classList.add('show')
-    }
-    function fmtBest(k){ const m = S.perMode[k]; return m.best? m.best.toFixed(2)+'s' : '—' }
-
-    // --- Events ---
-    checkBtn.addEventListener('click', check)
-    nextBtn.addEventListener('click', next)
-    resetBtn.addEventListener('click', () => { localStorage.removeItem('bhx_v2'); location.reload() })
-    answerBaseSel.addEventListener('change', () => { S.answerBase=answerBaseSel.value; showQuestion() })
-    diffSel.addEventListener('change', () => { S.difficulty=diffSel.value; applyDifficulty(); save(); showQuestion() })
-    roundLenInput.addEventListener('change', () => { save() })
-    showPV.addEventListener('change', () => { pvRow.textContent = showPV.checked ? powers.join('  ') : ''; Array.from(bitsEl.children).forEach((c,i)=>{ const pv=c.querySelector('.pv'); if(pv) pv.textContent = showPV.checked?powers[i]:'' }) })
-    assist.addEventListener('change', ()=>{ if(assist.checked) assistHint(true); else tag.textContent='Assisted off' })
-
-    tabs.forEach(t => t.addEventListener('click', () => {
-      tabs.forEach(x=>x.classList.remove('active'))
-      t.classList.add('active')
-      S.mode = t.dataset.mode
-      tabs.forEach(x=>x.setAttribute('aria-selected', x===t? 'true':'false'))
-      showQuestion()
-    }))
-
-    document.addEventListener('keydown', (e) => {
-      if(e.key==='Enter'){ e.preventDefault(); if(ans.value.trim()) check(); else next() }
-      if(e.key===' '){ if(['octet','mask'].includes(S.mode)){ e.preventDefault(); const i = document.activeElement?.dataset?.pos? +document.activeElement.dataset.pos : 0; toggleBit(i) } }
-      if(['b','B'].includes(e.key)) answerBaseSel.value='bin', S.answerBase='bin', showQuestion()
-      if(['h','H'].includes(e.key)) answerBaseSel.value='hex', S.answerBase='hex', showQuestion()
-      if(['d','D'].includes(e.key)) answerBaseSel.value='dec', S.answerBase='dec', showQuestion()
-      if(e.key==='1'){ activateTab('octet') }
-      if(e.key==='2'){ activateTab('ipv4') }
-      if(e.key==='3'){ activateTab('hex') }
-      if(e.key==='4'){ activateTab('mask') }
-      // Number keys update bits when a bit is focused
-      if(e.key==='0' || e.key==='1'){
-        const f = document.activeElement
-        if(f && f.classList?.contains('bit')){
-          const i = +f.dataset.pos
-          const s = getBitsStr().split(''); s[i]=e.key; setBitsStr(s.join('')); syncPromptFromBits(); if(assist.checked) assistHint()
-        }
-      }
-    })
-
-    function activateTab(mode){
-      const t = tabs.find(x=>x.dataset.mode===mode)
-      if(!t) return
-      tabs.forEach(x=>x.classList.remove('active'))
-      t.classList.add('active')
-      S.mode = mode
-      tabs.forEach(x=>x.setAttribute('aria-selected', x===t? 'true':'false'))
-      showQuestion()
-    }
-
-    closeSummary.addEventListener('click', ()=> summaryModal.classList.remove('show'))
-    summaryModal.addEventListener('click', (e)=>{ if(e.target===summaryModal) summaryModal.classList.remove('show') })
-
-    // --- Init ---
-    load()
-    answerBaseSel.value = S.answerBase
-    diffSel.value = S.difficulty
-    roundLenInput.value = S.roundLen
-    xpEl.textContent = S.xp; levelChip.textContent = `Level ${S.level}`; streakChip.textContent = `Streak ${S.streak}`; bestEl.textContent = S.best? `${S.best.toFixed(1)}s` : '—'
-    updateBadges()
-    applyDifficulty()
-    showQuestion(); ans.focus()
-  })()
-  </script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
