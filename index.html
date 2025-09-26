@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Binary & Hex Trainer — ELI12</title>
+  <title>Binary & Hex Trainer</title>
   <meta name="description" content="Fast, friendly drills to master binary, hex, and IPv4 octets. ELI12 explanations, timed rounds, and progress tracking. Single-file app for GitHub Pages." />
   <style>
     :root{
@@ -63,7 +63,7 @@
     <header>
       <div class="logo">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 12a8 8 0 1 1 16 0" stroke="#6ee7ff" stroke-width="2"/><path d="M12 4v16" stroke="#8aa0ff" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#6b82ff"/></svg>
-        <h1>Binary & Hex Trainer — ELI12</h1>
+        <h1>Binary & Hex Trainer</h1>
       </div>
       <div class="bar">
         <div class="chip" id="levelChip">Level 1</div>
@@ -92,7 +92,7 @@
         </div>
 
         <div class="bits" id="bits"></div>
-        <div class="pvrow" id="pvRow"></div>
+        <div class="pvrow" id="pvRow" style="display: none;"></div>
 
         <div class="center" style="margin-top:12px">
           <input id="answer" class="in" placeholder="Type answer…" autocomplete="off" inputmode="decimal" />
@@ -118,7 +118,7 @@
       <!-- Right: Learn + Settings -->
       <aside class="card">
         <div class="title">
-          <h2>ELI12</h2>
+          <h2>Learn + Settings</h2>
           <div class="row">
             <label class="stat"><input type="checkbox" id="showPV" checked /> Show place values</label>
             <label class="stat"><input type="checkbox" id="strict" /> Strict timing</label>
