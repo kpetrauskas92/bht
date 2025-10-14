@@ -50,8 +50,6 @@ const elements = {
   grownupSections: Array.from(document.querySelectorAll('.grownup-only')),
   kidSubnetSlider: document.getElementById('kidSubnetSlider'),
   kidSubnetOutput: document.getElementById('kidSubnetOutput'),
-  kidPad: document.getElementById('kidPad'),
-  kidPadButtons: Array.from(document.querySelectorAll('#kidPad button')),
 }
 
 const KID_ALLOWED_MODES = ['octet', 'subnet']
@@ -336,36 +334,11 @@ export function setKidModeUI(enabled){
     elements.kidStarChip.classList.toggle('hidden', !enabled)
     elements.kidStarChip.setAttribute('aria-hidden', enabled ? 'false' : 'true')
   }
-  if(elements.kidPad){
-    elements.kidPad.classList.toggle('hidden', !enabled)
-    elements.kidPad.setAttribute('aria-hidden', enabled ? 'false' : 'true')
-  }
   if(elements.kidSubnetSlider){
     elements.kidSubnetSlider.toggleAttribute('disabled', !enabled)
     if(!enabled && elements.kidSubnetOutput){
       elements.kidSubnetOutput.textContent = 'Switch on Kid mode to play with subnets!'
     }
-  }
-  if(elements.answer){
-    elements.answer.readOnly = enabled
-    elements.answer.placeholder = enabled ? 'Tap the big buttons...' : 'Type your answer...'
-    elements.answer.setAttribute('inputmode', enabled ? 'none' : 'text')
-    elements.answer.setAttribute('aria-readonly', enabled ? 'true' : 'false')
-  }
-  if(elements.answerBase){
-    elements.answerBase.toggleAttribute('disabled', enabled)
-  }
-  if(elements.difficulty){
-    elements.difficulty.toggleAttribute('disabled', enabled)
-  }
-  if(elements.strict){
-    elements.strict.toggleAttribute('disabled', enabled)
-  }
-  if(elements.noTimer){
-    elements.noTimer.toggleAttribute('disabled', enabled)
-  }
-  if(elements.assist){
-    elements.assist.toggleAttribute('disabled', enabled)
   }
 }
 

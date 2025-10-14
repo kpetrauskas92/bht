@@ -42,7 +42,7 @@ import { bindSummary, showSummary } from './summary.js'
 
 const elements = getElements()
 const KID_ALLOWED_MODES = ['octet', 'subnet']
-const KID_MAX_DIGITS = 6
+
 const KID_PRAISES = [
   'Yay! You made the lights sparkle! 🎉',
   'High paw! Buddy Bear is proud of you! 🐾',
@@ -174,12 +174,6 @@ function bindEvents(){
     })
   }
 
-  if(elements.kidPadButtons?.length){
-    elements.kidPadButtons.forEach((btn) => {
-      btn.addEventListener('click', handleKidPadClick)
-    })
-  }
-
   elements.tabs.forEach(tab => tab.addEventListener('click', () => selectTab(tab)))
 
   document.addEventListener('keydown', handleGlobalKeys)
@@ -231,14 +225,7 @@ function handleGlobalKeys(e){
 }
 
 function selectTab(tab){
-  if(tab.getAttribute('aria-disabled') === 'true'){
-    if(state.kidMode) setKidMessage('Buddy Bear keeps that puzzle for bigger kids.', 'think')
-    return
-  }
-  if(state.kidMode && !KID_ALLOWED_MODES.includes(tab.dataset.mode)){
-    setKidMessage('Buddy Bear keeps that puzzle for bigger kids.', 'think')
-    return
-  }
+
   state.mode = tab.dataset.mode
   setActiveTab(state.mode)
   nextQuestion(true)
@@ -412,11 +399,6 @@ function updateKidExperience(question){
     setKidMessage('')
     return
   }
-  if(question?.mode === 'subnet'){
-    setKidStars(state.streak)
-    setKidMessage('Slide the magic bar to split the town just right, then tap Go!', 'guide')
-    return
-  }
   const story = question?.kidStory || question?.kidTask || 'Let’s play with shiny switches!'
   setKidMessage(story, 'guide')
   setKidStars(state.streak)
@@ -458,7 +440,6 @@ function applyKidModeDefaults({ fromInit = false } = {}){
   }
   setKidStars(state.streak)
   setKidMessage('Let’s play with shiny switches!', 'guide')
-  elements.answer.value = ''
   if(elements.kidSubnetSlider){
     updateKidSubnetLab(Number(elements.kidSubnetSlider.value))
   }
@@ -508,41 +489,6 @@ function disableKidMode(){
   saveState()
   updateStatus()
   startRound()
-}
-
-function handleKidPadClick(event){
-  if(!state.kidMode) return
-  event.preventDefault()
-  const target = event.currentTarget
-  if(!target) return
-  const digit = target.dataset.digit
-  const action = target.dataset.action
-  if(digit){
-    appendKidDigit(digit)
-    return
-  }
-  if(action === 'clear'){
-    elements.answer.value = ''
-    setKidMessage('All clean! Start tapping numbers again.', 'guide')
-    return
-  }
-  if(action === 'delete'){
-    elements.answer.value = elements.answer.value.slice(0, -1)
-    return
-  }
-  if(action === 'submit'){
-    if(!elements.answer.value.trim()){
-      setKidMessage('Tap some numbers before Go!', 'think')
-      return
-    }
-    checkAnswer()
-  }
-}
-
-function appendKidDigit(digit){
-  if(elements.answer.value.length >= KID_MAX_DIGITS) return
-  elements.answer.value += digit
-  setKidMessage('Great counting! Tap Go! when it looks right.', 'guide')
 }
 
 function handleExport(){
