@@ -40,7 +40,21 @@ const elements = {
   closeExplain: document.getElementById('closeExplain'),
   exportBtn: document.getElementById('exportBtn'),
   importInput: document.getElementById('importInput'),
+  kidToggle: document.getElementById('kidToggle'),
+  kidHelper: document.getElementById('kidHelper'),
+  kidHelperTitle: document.getElementById('kidHelperTitle'),
+  kidHelperText: document.getElementById('kidHelperText'),
+  kidHelperEmoji: document.getElementById('kidHelperEmoji'),
+  kidStarChip: document.getElementById('kidStarChip'),
+  kidOnlySections: Array.from(document.querySelectorAll('.kid-only')),
+  grownupSections: Array.from(document.querySelectorAll('.grownup-only')),
+  kidSubnetSlider: document.getElementById('kidSubnetSlider'),
+  kidSubnetOutput: document.getElementById('kidSubnetOutput'),
+  kidPad: document.getElementById('kidPad'),
+  kidPadButtons: Array.from(document.querySelectorAll('#kidPad button')),
 }
+
+const KID_ALLOWED_MODES = ['octet', 'subnet']
 
 let bitChangeHandler = null
 
@@ -53,9 +67,12 @@ export function onBitsChanged(cb){
 }
 
 export function renderQuestion(question){
-  elements.prompt.textContent = question.prompt
-  const taskLabel = elements.taskTag?.querySelector(\".task-text\")
-  if(taskLabel) taskLabel.textContent = question.task
+  const promptText = state.kidMode && question.kidPrompt ? question.kidPrompt : question.prompt
+  elements.prompt.textContent = promptText
+  const taskLabel = elements.taskTag?.querySelector('.task-text')
+  if(taskLabel){
+    taskLabel.textContent = state.kidMode && question.kidTask ? question.kidTask : question.task
+  }
   renderBits(question)
   elements.answer.value = ''
   clearAnswerFeedback()
@@ -181,6 +198,7 @@ export function updateStatus(){
   const currentAcc = currentRoundAccuracy()
   elements.accuracyChip.textContent = `Accuracy ${(currentAcc*100).toFixed(0)}%`
   elements.roundAcc.textContent = `${(currentAcc*100).toFixed(0)}%`
+  setKidStars(state.streak)
   const overall = state.hist.length ? state.hist.filter(e => e.ok).length / state.hist.length : 0
   if(elements.overallAcc){
     elements.overallAcc.textContent = `${(overall*100).toFixed(0)}%`
@@ -210,9 +228,11 @@ function updateBadges(){
 function updateTabs(){
   const suggested = new Set(difficultyAllowedModes(state.difficulty))
   elements.tabs.forEach((tab, idx) => {
-    tab.setAttribute('aria-disabled', 'false')
-    tab.classList.remove('locked')
-    tab.classList.toggle('suggested', suggested.has(tab.dataset.mode))
+    const allowed = !state.kidMode || KID_ALLOWED_MODES.includes(tab.dataset.mode)
+    tab.setAttribute('aria-disabled', allowed ? 'false' : 'true')
+    tab.classList.toggle('locked', !allowed)
+    tab.classList.toggle('suggested', allowed && suggested.has(tab.dataset.mode))
+    tab.setAttribute('tabindex', allowed ? '0' : '-1')
     tab.dataset.shortcut = String(idx + 1)
   })
 }
@@ -298,6 +318,106 @@ export function toggleTheme(){
   const next = state.theme === 'dark' ? 'light' : 'dark'
   setTheme(next)
   applyTheme(next)
+}
+
+export function setKidModeUI(enabled){
+  document.body.classList.toggle('kid-mode', enabled)
+  if(elements.kidToggle){
+    elements.kidToggle.textContent = enabled ? 'Kid mode on' : 'Kid mode'
+    elements.kidToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false')
+  }
+  toggleSectionVisibility(elements.kidOnlySections, !enabled)
+  toggleSectionVisibility(elements.grownupSections, enabled)
+  if(elements.kidHelper){
+    elements.kidHelper.classList.toggle('hidden', !enabled)
+    elements.kidHelper.setAttribute('aria-hidden', enabled ? 'false' : 'true')
+  }
+  if(elements.kidStarChip){
+    elements.kidStarChip.classList.toggle('hidden', !enabled)
+    elements.kidStarChip.setAttribute('aria-hidden', enabled ? 'false' : 'true')
+  }
+  if(elements.kidPad){
+    elements.kidPad.classList.toggle('hidden', !enabled)
+    elements.kidPad.setAttribute('aria-hidden', enabled ? 'false' : 'true')
+  }
+  if(elements.kidSubnetSlider){
+    elements.kidSubnetSlider.toggleAttribute('disabled', !enabled)
+    if(!enabled && elements.kidSubnetOutput){
+      elements.kidSubnetOutput.textContent = 'Switch on Kid mode to play with subnets!'
+    }
+  }
+  if(elements.answer){
+    elements.answer.readOnly = enabled
+    elements.answer.placeholder = enabled ? 'Tap the big buttons...' : 'Type your answer...'
+    elements.answer.setAttribute('inputmode', enabled ? 'none' : 'text')
+    elements.answer.setAttribute('aria-readonly', enabled ? 'true' : 'false')
+  }
+  if(elements.answerBase){
+    elements.answerBase.toggleAttribute('disabled', enabled)
+  }
+  if(elements.difficulty){
+    elements.difficulty.toggleAttribute('disabled', enabled)
+  }
+  if(elements.strict){
+    elements.strict.toggleAttribute('disabled', enabled)
+  }
+  if(elements.noTimer){
+    elements.noTimer.toggleAttribute('disabled', enabled)
+  }
+  if(elements.assist){
+    elements.assist.toggleAttribute('disabled', enabled)
+  }
+}
+
+export function setKidMessage(text, mood = 'guide'){
+  if(!elements.kidHelper) return
+  const emoji = mood === 'celebrate' ? '🎉' : mood === 'think' ? '🤔' : '🧸'
+  const active = state.kidMode
+  if(elements.kidHelperEmoji){
+    elements.kidHelperEmoji.textContent = emoji
+  }
+  const fallback = active ? 'Buddy Bear is cheering for you!' : ''
+  const finalText = text || fallback
+  if(elements.kidHelperText){
+    elements.kidHelperText.textContent = finalText
+  }
+  if(elements.kidHelper){
+    elements.kidHelper.classList.toggle('hidden', !active)
+    elements.kidHelper.setAttribute('aria-hidden', active ? 'false' : 'true')
+  }
+}
+
+export function setKidStars(count){
+  if(!elements.kidStarChip) return
+  const value = Math.max(0, Number(count) || 0)
+  elements.kidStarChip.textContent = `⭐ ${value}`
+  elements.kidStarChip.setAttribute('aria-label', `Kid stars ${value}`)
+  elements.kidStarChip.classList.toggle('hidden', !state.kidMode)
+  elements.kidStarChip.setAttribute('aria-hidden', state.kidMode ? 'false' : 'true')
+}
+
+export function updateKidSubnetLab(prefix){
+  if(!elements.kidSubnetOutput) return
+  const value = Number(prefix) || 24
+  const streets = Math.max(1, Math.pow(2, Math.max(0, value - 24)))
+  const hostCount = value >= 31 ? 0 : Math.max(0, Math.pow(2, 32 - value) - 2)
+  const streetWord = streets === 1 ? 'street' : 'streets'
+  const houseWord = hostCount === 1 ? 'house' : 'houses'
+  const message = `With /${value} we make ${streets} little ${streetWord} and ${hostCount} friend ${houseWord}!`
+  elements.kidSubnetOutput.textContent = message
+  if(elements.kidSubnetSlider){
+    elements.kidSubnetSlider.setAttribute('aria-valuenow', String(value))
+    elements.kidSubnetSlider.setAttribute('aria-valuetext', `Slash ${value} gives ${streets} ${streetWord} and ${hostCount} ${houseWord}`)
+  }
+}
+
+function toggleSectionVisibility(nodes, hidden){
+  if(!Array.isArray(nodes)) return
+  nodes.forEach((node) => {
+    if(!node) return
+    node.classList.toggle('hidden', hidden)
+    node.setAttribute('aria-hidden', hidden ? 'true' : 'false')
+  })
 }
 
 export function updateAssistLabel(){

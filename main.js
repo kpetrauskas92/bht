@@ -33,18 +33,39 @@ import {
   updateRoundAccuracy,
   refreshPV,
   setAssistHint,
+  setKidModeUI,
+  setKidMessage,
+  setKidStars,
+  updateKidSubnetLab,
 } from './ui.js'
 import { bindSummary, showSummary } from './summary.js'
 
 const elements = getElements()
+const KID_ALLOWED_MODES = ['octet', 'subnet']
+const KID_MAX_DIGITS = 6
+const KID_PRAISES = [
+  'Yay! You made the lights sparkle! 🎉',
+  'High paw! Buddy Bear is proud of you! 🐾',
+  'Fantastic! You solved the puzzle! 🌟',
+]
+const KID_ENCOURAGEMENTS = [
+  "Almost there! Let's peek together.",
+  'No worries, try again with Buddy Bear!',
+  "Oops! Let's flip the switches slowly.",
+]
 let roundDurationMs = state.roundLen * 1000
 let ticking = false
+let savedAdultSettings = null
 
 init()
 
 function init(){
   loadState()
   applyTheme(state.theme)
+  setKidModeUI(state.kidMode)
+  if(state.kidMode){
+    applyKidModeDefaults({ fromInit: true })
+  }
   setAnswerBase(state.answerBase)
   setDifficulty(state.difficulty)
   elements.roundLen.value = state.roundLen
@@ -54,6 +75,9 @@ function init(){
   updateStatus()
   bindEvents()
   bindSummary()
+  if(elements.kidSubnetSlider){
+    updateKidSubnetLab(Number(elements.kidSubnetSlider.value))
+  }
   startRound()
 }
 
@@ -63,12 +87,22 @@ function bindEvents(){
   elements.resetBtn.addEventListener('click', resetProgress)
 
   elements.answerBase.addEventListener('change', (e) => {
+    if(state.kidMode){
+      setAnswerBase('dec')
+      elements.answerBase.value = 'dec'
+      return
+    }
     setAnswerBase(e.target.value)
     saveState()
     nextQuestion(true)
   })
 
   elements.difficulty.addEventListener('change', (e) => {
+    if(state.kidMode){
+      setDifficulty('easy')
+      elements.difficulty.value = 'easy'
+      return
+    }
     setDifficulty(e.target.value)
     saveState()
     updateStatus()
@@ -87,6 +121,10 @@ function bindEvents(){
 
   if(elements.noTimer){
     elements.noTimer.addEventListener('change', () => {
+      if(state.kidMode){
+        elements.noTimer.checked = true
+        return
+      }
       state.noTimer = elements.noTimer.checked
       saveState()
       if(state.noTimer){
@@ -99,6 +137,10 @@ function bindEvents(){
 
   elements.themeToggle.addEventListener('click', toggleTheme)
 
+  if(elements.kidToggle){
+    elements.kidToggle.addEventListener('click', toggleKidMode)
+  }
+
   elements.showPV.addEventListener('change', () => {
     if(state.currentQuestion) refreshPV(state.currentQuestion)
   })
@@ -108,6 +150,10 @@ function bindEvents(){
   })
 
   elements.assist.addEventListener('change', () => {
+    if(state.kidMode){
+      elements.assist.checked = true
+      return
+    }
     state.assist = elements.assist.checked
     updateAssistLabel()
     saveState()
@@ -122,6 +168,18 @@ function bindEvents(){
   elements.exportBtn.addEventListener('click', handleExport)
   elements.importInput.addEventListener('change', handleImport)
 
+  if(elements.kidSubnetSlider){
+    elements.kidSubnetSlider.addEventListener('input', () => {
+      updateKidSubnetLab(Number(elements.kidSubnetSlider.value))
+    })
+  }
+
+  if(elements.kidPadButtons?.length){
+    elements.kidPadButtons.forEach((btn) => {
+      btn.addEventListener('click', handleKidPadClick)
+    })
+  }
+
   elements.tabs.forEach(tab => tab.addEventListener('click', () => selectTab(tab)))
 
   document.addEventListener('keydown', handleGlobalKeys)
@@ -134,8 +192,11 @@ function bindEvents(){
 }
 
 function handleGlobalKeys(e){
+  if(e.defaultPrevented) return
   const tag = e.target?.tagName
   const isFormControl = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA'
+  const isEditable = e.target?.isContentEditable
+  const isButtonLike = typeof e.target?.closest === 'function' && e.target.closest('button, a, [role="button"], [role="link"], [data-action]')
 
   if(e.key === 'Enter'){
     if(e.target === elements.answer){
@@ -144,14 +205,17 @@ function handleGlobalKeys(e){
       else nextQuestion(true)
       return
     }
-    if(!isFormControl){
+    if(isFormControl || isEditable || isButtonLike){
+      return
+    }
+    if(!isFormControl && !isEditable && !isButtonLike){
       e.preventDefault()
       checkAnswer()
       return
     }
   }
 
-  if(isFormControl) return
+  if(isFormControl || isEditable || isButtonLike) return
 
   if(e.key === 'n' || e.key === 'N'){
     e.preventDefault()
@@ -167,7 +231,14 @@ function handleGlobalKeys(e){
 }
 
 function selectTab(tab){
-  if(tab.getAttribute('aria-disabled') === 'true') return
+  if(tab.getAttribute('aria-disabled') === 'true'){
+    if(state.kidMode) setKidMessage('Buddy Bear keeps that puzzle for bigger kids.', 'think')
+    return
+  }
+  if(state.kidMode && !KID_ALLOWED_MODES.includes(tab.dataset.mode)){
+    setKidMessage('Buddy Bear keeps that puzzle for bigger kids.', 'think')
+    return
+  }
   state.mode = tab.dataset.mode
   setActiveTab(state.mode)
   nextQuestion(true)
@@ -246,6 +317,7 @@ function nextQuestion(force = false){
   renderUIQuestion(state.currentQuestion)
   highlightBits([])
   renderAssistHint(state.currentQuestion)
+  updateKidExperience(state.currentQuestion)
   setActiveTab(state.mode)
   state.startAt = performance.now()
   updateStatus()
@@ -276,6 +348,10 @@ function handleCorrect(ms){
   }
   updateRoundAccuracy()
   updateStatus()
+  if(state.kidMode){
+    setKidMessage(pickKidPraise(), 'celebrate')
+    setKidStars(state.streak)
+  }
   saveState()
   setTimeout(() => nextQuestion(true), 250)
 }
@@ -295,6 +371,10 @@ function handleWrong(result, elapsed){
     showExplanation(state.currentQuestion.explanation)
   }
   renderAssistHint(state.currentQuestion)
+  if(state.kidMode){
+    setKidMessage(pickKidEncouragement(), 'think')
+    setKidStars(state.streak)
+  }
 }
 
 function formatExpected(value, base){
@@ -327,6 +407,144 @@ function renderAssistHint(question = state.currentQuestion){
   setAssistHint(hints.length ? hints.join(' | ') : '')
 }
 
+function updateKidExperience(question){
+  if(!state.kidMode){
+    setKidMessage('')
+    return
+  }
+  if(question?.mode === 'subnet'){
+    setKidStars(state.streak)
+    setKidMessage('Slide the magic bar to split the town just right, then tap Go!', 'guide')
+    return
+  }
+  const story = question?.kidStory || question?.kidTask || 'Let’s play with shiny switches!'
+  setKidMessage(story, 'guide')
+  setKidStars(state.streak)
+}
+
+function pickKidPraise(){
+  return KID_PRAISES[Math.floor(Math.random() * KID_PRAISES.length)]
+}
+
+function pickKidEncouragement(){
+  return KID_ENCOURAGEMENTS[Math.floor(Math.random() * KID_ENCOURAGEMENTS.length)]
+}
+
+function applyKidModeDefaults({ fromInit = false } = {}){
+  if(!fromInit && !savedAdultSettings){
+    savedAdultSettings = {
+      difficulty: state.difficulty,
+      answerBase: state.answerBase,
+      noTimer: state.noTimer,
+      assist: state.assist,
+      mode: state.mode,
+    }
+  }
+  state.kidMode = true
+  setKidModeUI(true)
+  state.noTimer = true
+  if(elements.noTimer){
+    elements.noTimer.checked = true
+  }
+  state.assist = true
+  if(elements.assist){
+    elements.assist.checked = true
+  }
+  updateAssistLabel()
+  setDifficulty('easy')
+  setAnswerBase('dec')
+  if(!KID_ALLOWED_MODES.includes(state.mode)){
+    state.mode = 'octet'
+  }
+  setKidStars(state.streak)
+  setKidMessage('Let’s play with shiny switches!', 'guide')
+  elements.answer.value = ''
+  if(elements.kidSubnetSlider){
+    updateKidSubnetLab(Number(elements.kidSubnetSlider.value))
+  }
+}
+
+function toggleKidMode(){
+  if(state.kidMode){
+    disableKidMode()
+  } else {
+    applyKidModeDefaults()
+    saveState()
+    updateStatus()
+    startRound()
+  }
+}
+
+function disableKidMode(){
+  state.kidMode = false
+  setKidModeUI(false)
+  if(savedAdultSettings){
+    setDifficulty(savedAdultSettings.difficulty)
+    setAnswerBase(savedAdultSettings.answerBase)
+    state.noTimer = savedAdultSettings.noTimer
+    if(elements.noTimer){
+      elements.noTimer.checked = state.noTimer
+    }
+    state.assist = savedAdultSettings.assist
+    if(elements.assist){
+      elements.assist.checked = state.assist
+    }
+    state.mode = savedAdultSettings.mode || state.mode
+    savedAdultSettings = null
+  } else {
+    setDifficulty('norm')
+    setAnswerBase('dec')
+    state.noTimer = false
+    if(elements.noTimer){
+      elements.noTimer.checked = false
+    }
+    state.assist = false
+    if(elements.assist){
+      elements.assist.checked = false
+    }
+  }
+  updateAssistLabel()
+  setKidMessage('')
+  saveState()
+  updateStatus()
+  startRound()
+}
+
+function handleKidPadClick(event){
+  if(!state.kidMode) return
+  event.preventDefault()
+  const target = event.currentTarget
+  if(!target) return
+  const digit = target.dataset.digit
+  const action = target.dataset.action
+  if(digit){
+    appendKidDigit(digit)
+    return
+  }
+  if(action === 'clear'){
+    elements.answer.value = ''
+    setKidMessage('All clean! Start tapping numbers again.', 'guide')
+    return
+  }
+  if(action === 'delete'){
+    elements.answer.value = elements.answer.value.slice(0, -1)
+    return
+  }
+  if(action === 'submit'){
+    if(!elements.answer.value.trim()){
+      setKidMessage('Tap some numbers before Go!', 'think')
+      return
+    }
+    checkAnswer()
+  }
+}
+
+function appendKidDigit(digit){
+  if(elements.answer.value.length >= KID_MAX_DIGITS) return
+  elements.answer.value += digit
+  setKidMessage('Great counting! Tap Go! when it looks right.', 'guide')
+}
+
 function handleExport(){
   const blob = new Blob([exportState()], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -340,8 +558,12 @@ function handleExport(){
 }
 
 function handleImport(event){
-  const file = event.target.files?.[0]
-  if(!file) return
+  const input = event.target
+  const file = input.files?.[0]
+  if(!file){
+    if(input) input.value = ''
+    return
+  }
   const reader = new FileReader()
   reader.onload = () => {
     try {
@@ -358,6 +580,12 @@ function handleImport(event){
     } catch (err) {
       alert(err.message)
     }
+  }
+  reader.onerror = () => {
+    alert('Could not read that file. Please try again.')
+  }
+  reader.onloadend = () => {
+    if(input) input.value = ''
   }
   reader.readAsText(file)
 }
