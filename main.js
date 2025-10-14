@@ -505,9 +505,12 @@ function handleExport(){
 
 function handleImport(event){
   const input = event.target
+  const resetInput = () => {
+    if(input) input.value = ''
+  }
   const file = input.files?.[0]
   if(!file){
-    if(input) input.value = ''
+    resetInput()
     return
   }
   const reader = new FileReader()
@@ -519,19 +522,21 @@ function handleImport(event){
       setDifficulty(state.difficulty)
       elements.roundLen.value = state.roundLen
       elements.autoExplain.checked = state.autoExplain
-      elements.assist.checked = state.assist
+      if(elements.assist){
+        elements.assist.checked = state.assist
+      }
       updateAssistLabel()
       updateStatus()
       startRound()
     } catch (err) {
       alert(err.message)
+    } finally {
+      resetInput()
     }
   }
   reader.onerror = () => {
     alert('Could not read that file. Please try again.')
-  }
-  reader.onloadend = () => {
-    if(input) input.value = ''
+    resetInput()
   }
   reader.readAsText(file)
 }
