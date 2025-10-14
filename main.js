@@ -42,6 +42,7 @@ import { bindSummary, showSummary } from './summary.js'
 
 const elements = getElements()
 const KID_ALLOWED_MODES = ['octet', 'subnet']
+
 const KID_PRAISES = [
   'Yay! You made the lights sparkle! 🎉',
   'High paw! Buddy Bear is proud of you! 🐾',
@@ -224,8 +225,7 @@ function handleGlobalKeys(e){
 }
 
 function selectTab(tab){
-  if(tab.getAttribute('aria-disabled') === 'true') return
-  if(state.kidMode && !KID_ALLOWED_MODES.includes(tab.dataset.mode)) return
+
   state.mode = tab.dataset.mode
   setActiveTab(state.mode)
   nextQuestion(true)
