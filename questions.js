@@ -23,6 +23,7 @@ export function generateQuestion(){
   if(question.validBases.length && !question.validBases.includes(state.answerBase)){
     state.answerBase = question.validBases[0]
   }
+  question = addKidHints(question)
   return question
 }
 
@@ -126,7 +127,7 @@ function genOctet(state){
     hex: unique([hex, hex.toLowerCase(), `0x${hex}`, `0x${hex.toLowerCase()}`])
   }
 
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'octet',
     prompt,
@@ -138,7 +139,11 @@ function genOctet(state){
     highlight: indicesOf(binary,'1'),
     validBases:['dec','bin','hex'],
     acceptsBits:true,
-  }
+  }, {
+    kidPrompt: source === 'bin' ? `Light pattern: ${prompt}` : `Number magic: ${prompt}`,
+    kidTask: `Show it in ${kidBaseName(base)} for Buddy Bear.`,
+    kidStory: `Buddy Bear has ${value} treats. Turn on the right lights to count them!`,
+  })
 }
 
 function genHex(state){
@@ -160,7 +165,7 @@ function genHex(state){
   }
   const explanation = buildBitExplanation(binary, value)
   const bitGroups = chunkBinary(binary,8).map((bits, idx) => ({ bits, label:`byte${idx}` }))
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'hex',
     prompt,
@@ -171,7 +176,11 @@ function genHex(state){
     highlight: indicesOf(binary,'1'),
     validBases:['dec','bin','hex'],
     acceptsBits:true,
-  }
+  }, {
+    kidPrompt: source === 'hex' ? `Magic hex: ${prompt}` : `Light groups: ${prompt}`,
+    kidTask: `Change it into ${kidBaseName(base)} for Buddy Bear.`,
+    kidStory: 'Group the switches in fours to read the secret hex code.',
+  })
 }
 
 function genIPv4(state){
@@ -203,7 +212,7 @@ function genIPv4(state){
   }
   const explanation = [`IPv4 ${dotted}`, ...octets.map((o,idx)=>`Octet ${idx+1}: ${toBin(o,8)} = ${o}`)]
   const bitGroups = octets.map((o, idx) => ({ bits: toBin(o,8), label: `Octet ${idx+1}` }))
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'ipv4',
     prompt,
@@ -214,7 +223,11 @@ function genIPv4(state){
     highlight: indicesOf(binary,'1'),
     validBases:['dec','bin','hex'],
     acceptsBits:true,
-  }
+  }, {
+    kidPrompt: source === 'dec' ? `Address: ${prompt}` : `Address puzzle: ${prompt}`,
+    kidTask: 'Build the friendly house address.',
+    kidStory: 'Each dot is a house on the street. Read each group to find Buddy Bear’s home.',
+  })
 }
 
 function genMask(state){
@@ -255,7 +268,7 @@ function genMask(state){
   const bitGroups = chunkBinary(maskBits,8).map((bits, idx) => ({ bits, label: `Octet ${idx+1}` }))
   let validBases = ['dec','bin','hex']
   if(questionType === 'hosts') validBases = ['dec']
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'mask',
     prompt,
@@ -267,7 +280,13 @@ function genMask(state){
     validBases,
     acceptsBits:true,
     forcedBase: questionType === 'hosts' ? 'dec' : null,
-  }
+  }, {
+    kidPrompt: `Mask puzzle: ${prompt}`,
+    kidTask: questionType === 'hosts' ? 'How many friends fit on each street?' : 'Show Buddy Bear the mask number.',
+    kidStory: questionType === 'hosts'
+      ? `Cover the last ${32-prefix} spots and count the free ones for friends.`
+      : 'A mask keeps certain lights on. Count how many stay shiny.',
+  })
 }
 
 function genIPv6(state){
@@ -286,7 +305,7 @@ function genIPv6(state){
   }
   const bitGroups = chunkBinary(binary,16).map((bits, idx) => ({ bits, label: `Hextet ${idx+1}` }))
   const explanation = hextets.map((h, idx)=>`Hextet ${idx+1}: ${h} = ${toBin(parseInt(h,16),16)}`)
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'ipv6',
     prompt,
@@ -298,16 +317,22 @@ function genIPv6(state){
     validBases,
     acceptsBits:true,
     forcedBase: validBases.includes(state.answerBase) ? null : 'hex',
-  }
+  }, {
+    kidPrompt: base === 'hex' ? `Giant lights: ${prompt}` : `Magic address: ${prompt}`,
+    kidTask: 'Turn the big address into friendly pieces.',
+    kidStory: 'Break the huge address into smaller chunks so Buddy Bear can read it.',
+  })
 }
 
 function genSubnet(state){
   const diff = state.difficulty
-  const type = diff === 'expert' ? pick(['hosts','subnets','wildcard']) : pick(['hosts','subnets'])
+  const baseTypes = diff === 'expert' ? ['hosts','subnets','wildcard'] : ['hosts','subnets']
+  const typePool = state.kidMode ? baseTypes.filter(t => t !== 'wildcard') : baseTypes
+  const type = pick(typePool)
   if(type === 'hosts'){
     const prefix = randInt(8,30)
     const hosts = prefix >= 31 ? 0 : Math.pow(2, 32-prefix) - 2
-    return {
+    return addKidHints({
       id: cryptoId(),
       mode:'subnet',
       prompt: `/${prefix} network`,
@@ -318,13 +343,19 @@ function genSubnet(state){
       validBases:['dec'],
       forcedBase:'dec',
       acceptsBits:false,
-    }
+    }, {
+      kidPrompt: `Playground /${prefix}`,
+      kidTask: 'How many friends can play on one street?',
+      kidStory: hosts > 0
+        ? `We cut the big yard into /${prefix} streets. Each street fits ${hosts} friends!`
+        : `A /${prefix} street is too tiny for friends, so no extra houses here.`,
+    })
   }
   if(type === 'subnets'){
     const basePrefix = randInt(8,24)
     const newPrefix = randInt(basePrefix+1, Math.min(30, basePrefix+6))
     const subnets = Math.pow(2, newPrefix - basePrefix)
-    return {
+    return addKidHints({
       id: cryptoId(),
       mode:'subnet',
       prompt: `${basePrefix} -> ${newPrefix}`,
@@ -335,7 +366,11 @@ function genSubnet(state){
       validBases:['dec'],
       forcedBase:'dec',
       acceptsBits:false,
-    }
+    }, {
+      kidPrompt: `Split /${basePrefix} into /${newPrefix}`,
+      kidTask: 'How many tiny streets did we make?',
+      kidStory: `We chopped a /${basePrefix} town into /${newPrefix} streets. Count the ${subnets} new playgrounds!`,
+    })
   }
   // wildcard type
   const prefix = randInt(8,30)
@@ -343,7 +378,7 @@ function genSubnet(state){
   const maskOctets = chunkBinary(maskBits,8).map(b=>parseInt(b,2))
   const wildcardOctets = maskOctets.map(o=>255-o)
   const wildcard = wildcardOctets.join('.')
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'subnet',
     prompt: `/${prefix} network`,
@@ -354,7 +389,11 @@ function genSubnet(state){
     validBases:['dec'],
     forcedBase:'dec',
     acceptsBits:false,
-  }
+  }, {
+    kidPrompt: `Wildcard for /${prefix}`,
+    kidTask: 'Find the leftover numbers.',
+    kidStory: 'Take 255 from each mask piece to find the playful wildcard.',
+  })
 }
 
 function genReverse(state){
@@ -368,7 +407,7 @@ function genReverse(state){
     hex: [toHex(baseValue,2)]
   }
   const explanation = buildBitExplanation(binary, baseValue)
-  return {
+  return addKidHints({
     id: cryptoId(),
     mode:'reverse',
     prompt,
@@ -380,7 +419,11 @@ function genReverse(state){
     validBases:['bin'],
     forcedBase:'bin',
     acceptsBits:true,
-  }
+  }, {
+    kidPrompt: `Number: ${prompt}`,
+    kidTask: 'Flip the switches to match the number.',
+    kidStory: 'Turn the lights on or off until they show the magic number.',
+  })
 }
 
 function baseName(base){
@@ -393,6 +436,77 @@ function sourceName(src){
   if(src === 'hex') return 'hex'
   if(src === 'bin') return 'binary'
   return 'decimal'
+}
+
+function addKidHints(question, overrides = {}){
+  if(!question) return question
+  const defaults = defaultKidHints(question)
+  question.kidPrompt = overrides.kidPrompt ?? defaults.kidPrompt
+  question.kidTask = overrides.kidTask ?? defaults.kidTask
+  question.kidStory = overrides.kidStory ?? defaults.kidStory
+  return question
+}
+
+function defaultKidHints(question){
+  const prompt = question.prompt
+  const task = question.task || 'Let’s solve the puzzle!'
+  switch(question.mode){
+    case 'octet':
+      return {
+        kidPrompt: `Shiny switches: ${prompt}`,
+        kidTask: 'How many treats do the lights show?',
+        kidStory: 'Add the numbers under the glowing 1s to count the treats.',
+      }
+    case 'hex':
+      return {
+        kidPrompt: `Magic code: ${prompt}`,
+        kidTask: 'Turn the magic code into a friendly number.',
+        kidStory: 'Group the switches in fours to read the hex magic.',
+      }
+    case 'ipv4':
+      return {
+        kidPrompt: `Address puzzle: ${prompt}`,
+        kidTask: 'Build the friendly house address.',
+        kidStory: 'Each dot is a house. Read every group to find Buddy Bear’s home.',
+      }
+    case 'mask':
+      return {
+        kidPrompt: `Mask puzzle: ${prompt}`,
+        kidTask: task,
+        kidStory: 'A mask keeps special lights on. Count how many stay shiny.',
+      }
+    case 'ipv6':
+      return {
+        kidPrompt: `Magic address: ${prompt}`,
+        kidTask: task,
+        kidStory: 'Break the huge address into smaller chunks so Buddy Bear can read it.',
+      }
+    case 'subnet':
+      return {
+        kidPrompt: `Subnet fun: ${prompt}`,
+        kidTask: task,
+        kidStory: 'Share the big playground into little streets for friends.',
+      }
+    case 'reverse':
+      return {
+        kidPrompt: `Number: ${prompt}`,
+        kidTask: task,
+        kidStory: 'Flip the switches until they match the number.',
+      }
+    default:
+      return {
+        kidPrompt: `Puzzle: ${prompt}`,
+        kidTask: task,
+        kidStory: 'Buddy Bear is here to help you count!',
+      }
+  }
+}
+
+function kidBaseName(base){
+  if(base === 'dec') return 'numbers'
+  if(base === 'bin') return 'light pattern'
+  if(base === 'hex') return 'hex magic'
+  return base
 }
 
 function toBin(value, width){

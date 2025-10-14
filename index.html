@@ -23,7 +23,9 @@
         <div class="chip" id="streakChip" aria-live="polite">Streak 0</div>
         <div class="chip" id="achChip" title="Achievements">0 trophies</div>
         <div class="chip" id="accuracyChip" aria-live="polite">Accuracy 0%</div>
+        <div class="chip kid-chip hidden" id="kidStarChip" aria-live="polite" aria-hidden="true">⭐ 0</div>
         <button class="btn alt" id="themeToggle" aria-pressed="false">Light mode</button>
+        <button class="btn alt" id="kidToggle" aria-pressed="false">Kid mode</button>
         <button class="btn alt" id="resetBtn" title="Reset progress">Reset</button>
         <button class="btn" id="nextBtn" title="Next question (Enter)">Next</button>
       </div>
@@ -135,6 +137,7 @@
                 </span>
                 <span>Import JSON</span>
               </label>
+              <input type="file" id="importInput" accept="application/json" hidden />
             </div>
             <div class="toolbar-note">Progress saved locally.</div>
           </div>
@@ -151,6 +154,14 @@
           </div>
         </div>
         <div class="assist-hint" id="assistHint" aria-live="polite" aria-hidden="true"></div>
+
+        <div class="kid-helper hidden" id="kidHelper" aria-live="polite" aria-hidden="true">
+          <div class="kid-helper__avatar" id="kidHelperEmoji" aria-hidden="true">🧸</div>
+          <div>
+            <div class="kid-helper__title" id="kidHelperTitle">Buddy Bear says:</div>
+            <div class="kid-helper__text" id="kidHelperText">Hello friend! Let's play with shiny switches.</div>
+          </div>
+        </div>
 
         <div class="bits" id="bits" aria-label="Bit editor" role="grid"></div>
         <div class="pvrow" id="pvRow" aria-hidden="false"></div>
@@ -175,14 +186,14 @@
 
       <!-- Right: Learn + Settings -->
       <aside class="card" aria-label="Learn and Settings" role="complementary">
-        <div class="title">
+        <div class="title grownup-only">
           <h2>ELI12</h2>
         </div>
-        <div class="sub" style="line-height:1.5">
+        <div class="sub grownup-only" style="line-height:1.5">
           Bits are 0 or 1. Eight bits make a byte. Each bit spot has a value: <span class="mono">128 64 32 16 8 4 2 1</span> (left to right). If a bit shows 1, add its value to get the decimal number.
         </div>
-        <div class="hr"></div>
-        <div style="display:grid; gap:10px">
+        <div class="hr grownup-only"></div>
+        <div class="grownup-only" style="display:grid; gap:10px">
           <div>
             <strong>Binary -> Decimal</strong>
             <div class="sub">Add the values under the 1s. Example: <code class="mono">11001010</code> -> <code>128 + 64 + 8 + 2 = 202</code>.</div>
@@ -204,10 +215,10 @@
             <div class="sub">Inside one byte: <span class="mono">/25 128</span>, <span class="mono">/26 192</span>, ... , <span class="mono">/32 255</span>.</div>
           </div>
         </div>
-        <div class="hr"></div>
+        <div class="hr grownup-only"></div>
 
-        <div class="title"><h2>Settings</h2></div>
-        <div class="settings-grid">
+        <div class="title grownup-only"><h2>Settings</h2></div>
+        <div class="settings-grid grownup-only">
           <label class="setting-control">
             <span class="setting-label">Answer base</span>
             <select id="answerBase" class="in small" aria-label="Answer base">
@@ -230,7 +241,34 @@
             <input id="roundLen" class="in small" type="number" min="5" max="120" value="30" />
           </label>
           </div>
-        <div class="hr"></div>
+        <div class="hr grownup-only"></div>
+
+        <div class="kid-only hidden" id="kidLearn" aria-hidden="true">
+          <div class="title"><h2>Buddy Bear's tips</h2></div>
+          <div class="kid-learn-grid">
+            <div class="kid-tip">
+              <div class="kid-tip__icon" aria-hidden="true">💡</div>
+              <div class="kid-tip__text">Lights on (1) mean "add me!" Lights off (0) mean "leave me".</div>
+            </div>
+            <div class="kid-tip">
+              <div class="kid-tip__icon" aria-hidden="true">🍎</div>
+              <div class="kid-tip__text">Count the yummy treats by adding the numbers under the shining lights.</div>
+            </div>
+            <div class="kid-tip">
+              <div class="kid-tip__icon" aria-hidden="true">🏠</div>
+              <div class="kid-tip__text">Subnet time! We split a big town into little friendly streets for our pals.</div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="kid-subnet" id="kidSubnetLab">
+            <div class="kid-subnet__title">Subnet Playground</div>
+            <label class="kid-subnet__control">
+              <span>Choose a magic number:</span>
+              <input type="range" id="kidSubnetSlider" min="24" max="30" value="26" aria-label="Choose subnet prefix" />
+            </label>
+            <div class="kid-subnet__output" id="kidSubnetOutput">With /26 we make 4 little streets and 62 friend houses!</div>
+          </div>
+        </div>
       </aside>
     </div>
   </div>

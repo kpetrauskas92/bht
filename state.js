@@ -35,6 +35,7 @@ export const state = {
   accuracyWindow: [],
   theme: 'dark',
   autoExplain: false,
+  kidMode: false,
 }
 
 export const constants = {
@@ -65,6 +66,7 @@ export function loadState(){
       hist: data.hist || [],
       theme: data.theme || 'dark',
       autoExplain: data.autoExplain || false,
+      kidMode: data.kidMode ?? state.kidMode,
     })
   } catch (err) {
     console.warn('Failed to load state', err)
@@ -97,6 +99,7 @@ export function saveState(){
     hist: state.hist.slice(-MAX_HISTORY),
     theme: state.theme,
     autoExplain: state.autoExplain,
+    kidMode: state.kidMode,
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
@@ -124,6 +127,7 @@ export function exportState(){
       hist: state.hist,
       theme: state.theme,
       autoExplain: state.autoExplain,
+      kidMode: state.kidMode,
     }
   }, null, 2)
 }
@@ -152,6 +156,7 @@ export function importState(json){
     hist: Array.isArray(payload.hist) ? payload.hist.slice(-MAX_HISTORY) : state.hist,
     theme: payload.theme || state.theme,
     autoExplain: payload.autoExplain ?? state.autoExplain,
+    kidMode: payload.kidMode ?? state.kidMode,
   })
   saveState()
 }
