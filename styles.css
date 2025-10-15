@@ -71,6 +71,7 @@ body.kid-mode .task-banner {
   background:rgba(255,255,255,.15);
   border-radius:14px;
   padding:8px 12px;
+  color:#1f2b66;
 }
 
 body.kid-mode .btn {
@@ -622,7 +623,7 @@ canvas {
   padding:6px 12px;
   border-radius:999px;
   background:linear-gradient(90deg,var(--accent-strong),var(--accent));
-  color:#0b1020;
+  color:#ffffff;
   font-size:13px;
   font-weight:700;
   letter-spacing:.3px;
@@ -632,7 +633,6 @@ canvas {
   width:18px;
   height:18px;
 }
-[data-theme="light"] .task-banner { color:#ffffff; }
 .assist-hint {
   display:none;
   font-size:13px;
