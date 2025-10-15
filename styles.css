@@ -54,6 +54,9 @@ body.kid-mode {
   background: radial-gradient(900px 600px at 10% 0%, rgba(255,205,120,.55) 0%, transparent 60%),
               radial-gradient(900px 700px at 90% 10%, rgba(255,122,217,.45) 0%, transparent 65%),
               var(--bg);
+  --kid-ink:#1f2b66;
+  --kid-ink-strong:#14205a;
+  --kid-ink-muted:#30418f;
 }
 
 body.kid-mode .card {
@@ -284,6 +287,15 @@ h1 { font-size:24px; margin:0; letter-spacing:.4px; }
 body.kid-mode .kid-helper {
   background:rgba(255,255,255,.9);
   border-color:rgba(249,115,22,.65);
+  color:var(--kid-ink);
+}
+
+body.kid-mode .kid-helper__title {
+  color:var(--kid-ink-strong);
+}
+
+body.kid-mode .kid-helper__text {
+  color:var(--kid-ink-muted);
 }
 
 .kid-helper__avatar { font-size:28px; }
@@ -306,6 +318,11 @@ body.kid-mode .kid-helper {
 
 body.kid-mode .kid-tip {
   background:rgba(255,255,255,.9);
+  color:var(--kid-ink);
+}
+
+body.kid-mode .kid-tip__text {
+  color:var(--kid-ink-muted);
 }
 
 .kid-tip__icon { font-size:24px; }
@@ -321,6 +338,15 @@ body.kid-mode .kid-tip {
 
 body.kid-mode .kid-subnet {
   background:rgba(255,255,255,.92);
+  color:var(--kid-ink);
+}
+
+body.kid-mode .kid-subnet__title {
+  color:var(--kid-ink-strong);
+}
+
+body.kid-mode .kid-subnet__control {
+  color:var(--kid-ink-muted);
 }
 
 .kid-subnet__title {
