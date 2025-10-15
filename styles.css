@@ -235,14 +235,6 @@ h1 { font-size:24px; margin:0; letter-spacing:.4px; }
   100% { transform:perspective(200px) rotateX(360deg); }
 }
 
-.pvrow {
-  display:none;
-  margin-bottom:18px;
-}
-.pvrow[aria-hidden="false"] {
-  display:block;
-}
-
 .hr { height:1px; background:rgba(110,131,255,.25); margin:12px 0; }
 
 .timerbar {
