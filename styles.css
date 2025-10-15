@@ -70,6 +70,13 @@ body.kid-mode .prompt {
   letter-spacing:.6px;
 }
 
+body.kid-mode .task-banner {
+  background:rgba(255,255,255,.15);
+  border-radius:14px;
+  padding:8px 12px;
+  color:#1f2b66;
+}
+
 body.kid-mode .btn {
   font-size:16px;
   padding:12px 18px;
@@ -643,23 +650,6 @@ canvas {
 .task-banner svg {
   width:18px;
   height:18px;
-}
-
-body.kid-mode .task-banner {
-  background:rgba(255,255,255,.2);
-  border-radius:14px;
-  padding:8px 12px;
-  color:var(--kid-ink);
-  box-shadow:0 20px 40px rgba(0,0,0,.18);
-}
-
-body.kid-mode .task-banner svg {
-  color:inherit;
-}
-
-html[data-theme="light"] body.kid-mode .task-banner {
-  background:rgba(255,255,255,.9);
-  box-shadow:0 12px 20px rgba(45,70,150,.12);
 }
 .assist-hint {
   display:none;
