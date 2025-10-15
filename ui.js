@@ -87,7 +87,9 @@ function renderBits(question){
   container.innerHTML = ''
   const groups = question.bitGroups || []
   if(!groups.length){
-    elements.pvRow.textContent = ''
+    if(elements.pvRow){
+      elements.pvRow.textContent = ''
+    }
     container.setAttribute('aria-hidden','true')
     return
   }
@@ -179,6 +181,7 @@ export function highlightBits(indices){
 }
 
 export function refreshPV(question){
+  if(!elements.pvRow) return
   if(!elements.showPV.checked){
     elements.pvRow.textContent = ''
     return
